@@ -6,8 +6,8 @@ h3. Usage
 <code class='ruby'>
 	class Book < ActiveResource::Base
 	  self.site = 'http://library.alexandria.org/'
-	  named_scope :limit, lambda { |n| { :limit => n } }
-	  named_scope :by_author, lambda { |author| { :author => author } }
+	  named_scope :limit, lambda { |n| { :params => { :limit => n } } }
+	  named_scope :by_author, lambda { |author| { :params => { :author => author } } }
 		named_scope :out_of_print, lambda { { :from => :out_of_print } }
 	end
 	
@@ -51,3 +51,14 @@ Then, from the command line in RAILS_APP_ROOT:
 	sudo rake gems:install
 </code>
 </pre>
+
+h3. Duplication w.r.t. @ActiveRecord::NamedScope@
+
+Much of the code in this project could be replaced with that in @ActiveRecord::Base@ and @ActiveRecord::NamedScope@.
+Unfortunately, that code is very tightly tied to @ActiveRecord@.  If the Rails team does want to move this into
+core, I would encourage them to try to merge those two implementation.  The nastiest bit is mostly that @ActiveRecord@'s
+version hardcodes the list of things that get merged instead of replaced when scopes are combined:
+<code class='ruby'>[:conditions, :include, :joins, :find]</code>. This version needs to only do @merge@s (or @reverse_merge@s)
+on @:params@.  The only other significant bit is that the support for scoping (the @#with_scope@, @#default_scope@,
+@#scoped?@, @#scope@, @#scoped_methods@, and @#current_scoped_methods@ methods) for @ActiveRecord@ is in
+@ActiveRecord::Base@, not in the included @ActiveRecord::NamedScope@ module and thus can't be re-used here.

@@ -30,7 +30,7 @@
 
 === In your Rails app's <tt>config/environment.rb</tt>:
 
-	gem 'gcnovus-arns', :source => 'http://gems.github.com'
+	gem 'gcnovus-arns', :source => 'http://gems.github.com', :lib => 'arns'
 
 Then, from the command line in RAILS_APP_ROOT:
 

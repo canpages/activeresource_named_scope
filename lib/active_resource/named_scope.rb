@@ -41,6 +41,8 @@ module ActiveResource
 	#   # => GET /books.xml?author=Douglas+Adams&limit=2
   module NamedScope
     
+    VERSION = "0.0.1"
+    
     def self.included(base)
       base.extend ClassMethods
       base.send :include, InstanceMethods

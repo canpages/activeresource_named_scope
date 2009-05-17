@@ -2,8 +2,10 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rcov/rcovtask'
+require 'rake/gempackagetask'
 
 $LOAD_PATH.unshift("lib")
+require 'active_resource/named_scope'
 
 desc 'Run unit tests'
 task :default => :test
@@ -31,4 +33,32 @@ Rcov::RcovTask.new(:coverage) do |rcov|
   rcov.output_dir = 'coverage'
   rcov.verbose    = true
   rcov.rcov_opts  = ['--sort coverage', '-x "(^/)|(/Gems/)"', '-Ilib']
+end
+
+spec = Gem::Specification.new do |s|
+  s.name = "arns"
+  s.version = ActiveResource::NamedScope::VERSION
+  s.summary = "named_scope for ActiveResource"
+  s.homepage = "http://github.com/gcnovus/arns"
+ 
+  s.files = FileList['[A-Z]*', '{lib,test}/**/*']
+ 
+  s.has_rdoc = true
+  s.extra_rdoc_files = ["README.rdoc"]
+  s.rdoc_options = ["--line-numbers", "--main", "README.rdoc"]
+ 
+  s.authors = ["Gaius Novus"]
+  s.email = "gaius.c.novus@gmail.com"
+end
+
+Rake::GemPackageTask.new spec do |pkg|
+  pkg.need_tar = true
+  pkg.need_zip = true
+end
+
+desc "Generate a gemspec file for GitHub"
+task :gemspec do
+  File.open("#{spec.name}.gemspec", 'w') do |f|
+    f.write spec.to_ruby
+  end
 end

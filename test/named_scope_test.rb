@@ -84,6 +84,11 @@ class NamedScopeTest < Test::Unit::TestCase
         @class.limit(4).limit(2).to_a
       end
       
+      should 'accept long chains of named scopes with all sorts of overwriting' do
+        @class.expects(:find).with(:all, { :from => :rare, :params => { :author => 'Wilkie Collins', :limit => 22 } })
+        @class.limit(9).rare.out_of_print.with_author('Wilkie Collins').limit(22).rare.to_a
+      end
+      
     end
     
     context 'the result of a named scope evaluation' do
@@ -129,6 +134,10 @@ class NamedScopeTest < Test::Unit::TestCase
       
       should 'support :length' do
         assert_equal 2, @class.foo.length
+      end
+      
+      should 'raise a NoMethodError for other methods' do
+        assert_raises(NoMethodError) { @class.foo.bar }
       end
       
     end

@@ -105,10 +105,6 @@ module ActiveResource
         @options
       end
       
-      def named_scopes
-        resource_class.named_scopes
-      end
-      
       # Object defines a default +to_a+ in Ruby 1.8, but it is deprecated.
       def to_a
         found

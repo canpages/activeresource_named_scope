@@ -1,0 +1,48 @@
+= ARNS adds named_scopes to ActiveResource.
+
+== Usage
+
+	class Book < ActiveResource::Base
+	  self.site = 'http://library.alexandria.org/'
+	  named_scope :limit, lambda { |n| { :params => { :limit => n } } }
+	  named_scope :by_author, lambda { |author| { :params => { :author => author } } }
+		named_scope :out_of_print, lambda { { :from => :out_of_print } }
+	end
+	
+	# same as Book.find(:all, :params => { :author => 'Zinn' }):
+	Book.by_author('Zinn')
+	# => GET /books.xml?author=Zinn
+	
+	# same as Book.find(:all, :params => { :author => 'Scarry', :limit => 2 }):
+	Book.by_author('Scarry').limit(2) 
+	# => GET /books.xml?author=Scarry&limit=2
+	
+	# same as Book.find(:all, :from => :out_of_print, :params => { :limit => 10 }):
+	Book.out_of_print.limit(10)
+	# => GET /books/out_of_print.xml?limit=10
+
+== Installation
+
+=== As a gem, from the command line:
+
+	gem sources -a http://gems.github.com (you only have to do this once)
+	sudo gem install gcnovus-arns
+
+=== In your Rails app's <tt>config/environment.rb</tt>:
+
+	gem 'gcnovus-arns', :source => 'http://gems.github.com'
+
+Then, from the command line in RAILS_APP_ROOT:
+
+	sudo rake gems:install
+
+== Duplication w.r.t. <tt>ActiveRecord::NamedScope</tt>
+
+Much of the code in this project could be replaced with that in <tt>ActiveRecord::Base</tt> and <tt>ActiveRecord::NamedScope</tt>.
+Unfortunately, that code is very tightly tied to +ActiveRecord+.  If the Rails team does want to move this into
+core, I would encourage them to try to merge those two implementation.  The nastiest bit is mostly that <tt>ActiveRecord</tt>'s
+version hardcodes the list of things that get merged instead of replaced when scopes are combined:
+<tt>[:conditions, :include, :joins, :find]</tt>. This version needs to only do <tt>merge</tt>s (or <tt>reverse_merge</tt>s)
+on <tt>:params</tt>.  The only other significant bit is that the support for scoping (the <tt>#with_scope</tt>, <tt>#default_scope</tt>,
+<tt>#scoped?</tt>, <tt>#scope</tt>, <tt>#scoped_methods</tt>, and <tt>#current_scoped_methods</tt> methods) for +ActiveRecord+ is in
+<tt>ActiveRecord::Base</tt>, not in the included <tt>ActiveRecord::NamedScope</tt> module and thus can't be re-used here.
